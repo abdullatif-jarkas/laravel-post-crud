@@ -9,6 +9,15 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="/styles.css">
     <title>@yield('title')</title>
+    <style>
+        .border-left{
+            border-left: 2px solid #ddd;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: auto auto auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,14 +27,30 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">posts</a>
+                        <a class="nav-link active" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/">users</a>
+                        <a href="{{route('post.create')}}" class="nav-link">add post</a>
                     </li>
+                    @auth
+                        @can('manageUsers', App\Models\User::class)
+                            <li class="nav-item border-left">
+                                <a class="nav-link" href="{{route('admin.users.index')}}">Manage Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{route('admin.categories.index')}}">Manage Categories</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/tags">Manage Tags</a>
+                            </li>
+                        @endcan
+                    @endauth
                 </ul>
             </div>
-            <button class="btn btn-secondary" type="button">logout</button>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <input type="submit" class="btn btn-secondary" value="Logout">
+            </form>
         </div>
     </nav>
     <div class="content my-5">

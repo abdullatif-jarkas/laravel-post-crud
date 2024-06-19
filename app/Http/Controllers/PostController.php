@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,8 +15,10 @@ class PostController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Post::class);
+
         $posts = Post::all();
-        return view('posts.index')->with("posts", $posts);
+        return view('posts.index', compact('posts'));
     }
 
     /**
@@ -22,7 +26,10 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $this->authorize('create', Post::class);
+        $categories = Category::all();
+        $tags = Tag::all();
+        return view('posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -30,18 +37,50 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $post = new Post;
-        if ($request->hasFile('image')) {
-            $image = $request['image'];
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
-        }
-        $post->create([
-            "title" => $request['title'],
-            "description" => $request['description'],
-            "image" => $imageName
+        // $request->validate([
+        //     'title' => 'required',
+        //     'category_id' => 'required',
+        //     'description' => 'required',
+        //     'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        // ]);
+
+        // $data = $request->only(['title', 'description']);
+        // if($request->hasFile('image')){
+        //     $image = $request->file('image');
+        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
+        //     $data['image'] = $imageName;
+        // }
+
+        // auth()->user()->posts()->create($data);
+
+        // return redirect()->route('post.index')->with("success", 'Post Added Successfully');
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'required|array',
+            'tags.*' => 'exists:tags,id',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        return redirect()->route('post.index')->with("success", 'Post Added Successfully');
+        $imageName = '';
+        if($request->hasFile('image')){
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $post['image'] = $imageName;
+            }
+        $post = new Post();
+        $post->user_id = auth()->id();
+        $post->category_id = $request->category_id;
+        $post->title = $request->title;
+        $post->description = $request->description;
+        $post->image = $imageName;
+        $post->save();
+
+        // ربط الوسوم بالبوست
+        $post->tags()->sync($request->tags);
+
+        // dd($post);
+        return redirect()->route('post.index')->with('success', 'Post created successfully.');
     }
 
     /**
@@ -49,7 +88,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return view('posts.show')->with("post", $post);
+        $this->authorize('view', Post::class);
+
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -57,7 +98,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view('posts.edit')->with("post", $post);
+        $this->authorize('update', $post);
+
+        return view('posts.edit', compact('post'));
     }
 
     /**
@@ -84,6 +127,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize('delete', $post);
+
         $post->delete();
         return redirect()->route('post.index')->with("success", 'Post Deleted Successfully');
     }
