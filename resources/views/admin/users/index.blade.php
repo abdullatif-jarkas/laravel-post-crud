@@ -9,6 +9,7 @@
                     <th scope="col">id</th>
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Image</th>
                     <th scope="col">action</th>
                 </tr>
             </thead>
@@ -18,6 +19,7 @@
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td><img src="/images/{{ $user->profile_image }}" alt="" class="shadow" style="width: 50px; border-radius: 50%"></td>
                         <td>
                             @can('manageUsers', $user)
                                 <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">

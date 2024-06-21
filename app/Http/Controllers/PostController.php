@@ -37,37 +37,19 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'title' => 'required',
-        //     'category_id' => 'required',
-        //     'description' => 'required',
-        //     'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-        // ]);
-
-        // $data = $request->only(['title', 'description']);
-        // if($request->hasFile('image')){
-        //     $image = $request->file('image');
-        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
-        //     $data['image'] = $imageName;
-        // }
-
-        // auth()->user()->posts()->create($data);
-
-        // return redirect()->route('post.index')->with("success", 'Post Added Successfully');
         $request->validate([
             'title' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'required',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'required|array',
-            'tags.*' => 'exists:tags,id',
-            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         $imageName = '';
-        if($request->hasFile('image')){
-                $image = $request->file('image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $post['image'] = $imageName;
-            }
+        if ($request->hasFile('image')) {
+            $image = $request['image'];
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+        }
         $post = new Post();
         $post->user_id = auth()->id();
         $post->category_id = $request->category_id;
@@ -76,7 +58,6 @@ class PostController extends Controller
         $post->image = $imageName;
         $post->save();
 
-        // ربط الوسوم بالبوست
         $post->tags()->sync($request->tags);
 
         // dd($post);
@@ -89,7 +70,6 @@ class PostController extends Controller
     public function show(Post $post)
     {
         $this->authorize('view', Post::class);
-
         return view('posts.show', compact('post'));
     }
 

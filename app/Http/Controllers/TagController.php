@@ -45,7 +45,6 @@ class TagController extends Controller
         $request->validate([
             'name' => 'required|unique:tags,name,' . $id . '|max:255',
         ]);
-
         $tag = Tag::findOrFail($id);
         $tag->update($request->all());
 

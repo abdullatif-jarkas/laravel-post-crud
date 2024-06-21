@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -42,14 +43,36 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $validateData = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'profile_image' => 'nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
         ]);
+        // if($request->hasFile('profile_image')){
+        //     $image = $request['profile_image'];
+        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
+        //     $image->move(public_path('images'), $imageName);
+        // }
+        // $user = User::create([
+        //     'name' => $request->name,
+        //     'email' => $request->email,
+        //     'password' => Hash::make($request->password),
+        //     'profile_image' => $image,
+        // ]);
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $imageName = '';
+        if ($request->hasFile('profile_image')) {
+            $image = $request['profile_image'];
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+        }
+        $user->profile_image = $imageName;
 
-        $user = User::create($validateData);
-
+        $user->save();
         Auth::login($user);
 
         return redirect('/');
@@ -63,6 +86,6 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }

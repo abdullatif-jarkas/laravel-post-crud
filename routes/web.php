@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
@@ -18,9 +19,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [PostController::class, 'index'])->name('post.index');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/', [PostController::class, 'index'])->name('post.index');
     // Post routes
     Route::get('/post/{post}', [PostController::class, 'show'])->name('post.show');
     Route::get('/edit/{post}', [PostController::class, 'edit'])->name('post.edit');
@@ -43,7 +44,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Tags routes
     Route::resource('tags', TagController::class);
-    
+
+    // Comments routes
+    // Route::resource('posts', PostController::class);
+    Route::post('posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::put('comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+
+
     // Logout route
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 });

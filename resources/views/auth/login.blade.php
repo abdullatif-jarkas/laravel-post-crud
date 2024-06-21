@@ -3,21 +3,24 @@
 
 @section('content')
 
-
-<form method="POST" action="{{route('login')}}">
-    @csrf
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email">
+<div class="login-container w-50 mx-auto mt-5">
+    <div class="login-form">
+        <h2 class="text-center mb-4">تسجيل الدخول</h2>
+        <form method="POST" action="{{route('login')}}">
+            @csrf
+            <div class="mb-3">
+                <label for="email" class="form-label">البريد الإلكتروني</label>
+                <input name="email" type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">كلمة المرور</label>
+                <input name="password" type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
+            <div class="mt-3 text-center">
+                <a href="register">don't have an account?</a>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-    </div>
-    <input type="submit" value="Login" class="btn btn-primary">
-
-</form>
-
-
+</div>
 @endsection

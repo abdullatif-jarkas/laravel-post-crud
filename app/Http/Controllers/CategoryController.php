@@ -49,11 +49,6 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -73,10 +68,7 @@ class CategoryController extends Controller
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images'), $imageName);
         }
-        $category->update([
-            "title" => $request['name'],
-            "image" => $imageName
-        ]);
+        $category->update($request->all());
         return redirect()->route('admin.categories.index')->with("success", 'Post Edited Successfully');
     }
 
